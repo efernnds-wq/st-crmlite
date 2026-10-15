@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="StaffCRM Lite proposal, version 2: the working prototype screen by screen, how to navigate it, what it covers, and what the production build adds.">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>StaffCRM Lite Prototype Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: proposal reads top-down in one ~760px column; a sticky contents rail sits left on wide screens; the pipeline stage strip is the signature motif. */
+:root{
+  --bg:#F5F7FA; --surface:#FFFFFF; --ink:#15202D; --muted:#566275; --rule:#D9DFE7;
+  --accent:#1D5BD0; --accent-soft:#E6EEFC; --good:#1E7A4F; --warn:#9A5B00; --tint:#EEF1F5;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#97A3B4; --rule:#2A3442;
+  --accent:#78A2FF; --accent-soft:#1B2840; --good:#5CC492; --warn:#E3A84A; --tint:#19212C; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#97A3B4; --rule:#2A3442;
+  --accent:#78A2FF; --accent-soft:#1B2840; --good:#5CC492; --warn:#E3A84A; --tint:#19212C; color-scheme:dark }
+
+body{background:var(--bg); color:var(--ink); font:16px/1.6 var(--body);
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 64px}
+.shell{max-width:1120px; margin:0 auto; display:grid; grid-template-columns:200px minmax(0,1fr); gap:56px}
+@media (max-width:900px){ .shell{grid-template-columns:minmax(0,1fr)} nav.toc{display:none} }
+
+nav.toc{position:sticky; top:calc(env(safe-area-inset-top,0px) + 32px); align-self:start; padding-top:40px; font-size:13px}
+nav.toc p{font:500 11px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 12px}
+nav.toc ol{list-style:none; margin:0; padding:0; display:grid; gap:6px; counter-reset:t}
+nav.toc a{color:var(--muted); text-decoration:none; display:block; padding:2px 0 2px 10px; border-left:2px solid var(--rule)}
+nav.toc a:hover, nav.toc a:focus-visible{color:var(--ink); border-left-color:var(--accent); outline:none}
+
+main{min-width:0; max-width:780px}
+header.hero{padding-block:48px 32px; border-bottom:1px solid var(--rule)}
+.eyebrow{font:500 12px/1.4 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 16px}
+h1{font:650 clamp(34px,5.4vw,54px)/1.05 var(--display); letter-spacing:-.02em; margin:0 0 16px; text-wrap:balance}
+.lede{font-size:19px; line-height:1.55; max-width:62ch; margin:0 0 28px; color:var(--ink)}
+.lede strong{font-weight:600}
+
+/* pipeline strip: the subject's own vocabulary */
+.stages{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0 0 28px; padding:0; list-style:none; font:500 12.5px/1 var(--mono)}
+.stages li{padding:8px 12px; border:1px solid var(--rule); border-radius:999px; background:var(--surface); color:var(--muted)}
+.stages li.won{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.stages .arr{border:0; background:none; padding:0 2px; color:var(--muted)}
+
+.facts{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:10px; overflow:hidden}
+.facts div{background:var(--surface); padding:16px 18px}
+.facts b{display:block; font:650 24px/1.15 var(--display); letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+.facts span{font-size:13.5px; color:var(--muted)}
+@media (max-width:620px){ .facts{grid-template-columns:minmax(0,1fr)} }
+
+section{padding-block:40px 8px; scroll-margin-top:24px}
+h2{font:650 26px/1.2 var(--display); letter-spacing:-.01em; margin:0 0 12px; text-wrap:balance}
+h3{font:600 16px/1.3 var(--body); margin:28px 0 8px}
+section > p.point{font-size:17px; max-width:66ch; margin:0 0 18px}
+p, li{max-width:68ch}
+ul.plain{padding-left:20px; margin:0 0 16px; display:grid; gap:6px}
+a{color:var(--accent)}
+code, .mono{font-family:var(--mono); font-size:.88em}
+
+.tablewrap{overflow-x:auto; margin:8px 0 20px; border:1px solid var(--rule); border-radius:10px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:560px}
+th,td{text-align:left; vertical-align:top; padding:10px 14px; border-bottom:1px solid var(--rule)}
+th{font:500 11.5px/1.3 var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--muted); background:var(--tint)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+tr.rec td{background:var(--accent-soft)}
+.pill{display:inline-block; font:500 11.5px/1 var(--mono); padding:4px 8px; border-radius:999px; border:1px solid var(--rule); color:var(--muted); white-space:nowrap}
+.pill.p1{border-color:var(--accent); color:var(--accent)}
+.pill.up{border-color:var(--warn); color:var(--warn)}
+
+figure{margin:12px 0 20px; border:1px solid var(--rule); border-radius:10px; background:var(--surface); padding:20px; overflow-x:auto}
+figcaption{font-size:13.5px; color:var(--muted); margin-top:12px}
+svg text{font-family:var(--body)}
+.d-box{fill:var(--surface); stroke:var(--muted); stroke-width:1.1}
+.d-dash{stroke-dasharray:4 4}
+.d-zone{fill:var(--tint); stroke:var(--rule)}
+.d-name{fill:var(--ink); font-weight:600; font-size:13px}
+.d-line{fill:var(--muted); font-size:11.5px}
+.d-zl{fill:var(--muted); font-size:11.5px; font-weight:600}
+.d-edge{stroke:var(--muted); stroke-width:1.2; fill:none}
+.d-head{fill:var(--muted)}
+
+/* timeline */
+.gantt{display:grid; gap:10px; min-width:560px}
+.g-axis,.g-row{display:grid; grid-template-columns:130px minmax(0,1fr) 128px; gap:12px; align-items:center}
+.g-track{position:relative; height:20px}
+.g-axis .g-track{height:18px; border-bottom:1px solid var(--rule)}
+.tick{position:absolute; top:0; transform:translateX(-50%); font:500 11px/1 var(--mono); color:var(--muted)}
+.g-row .g-track::before{content:""; position:absolute; inset:9px 0 auto 0; height:1px; background:var(--rule)}
+.bar{position:absolute; top:3px; height:14px; border-radius:7px; background:var(--accent-soft); border:1px solid var(--accent)}
+.ms{position:absolute; top:3px; width:13px; height:13px; transform:translateX(-50%) rotate(45deg); background:var(--muted)}
+.ms.key{background:var(--accent)}
+.g-name{font-size:14px}
+.g-date{font:400 12px/1.2 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums}
+.g-row.key .g-name, .g-row.key .g-date{font-weight:600; color:var(--ink)}
+
+.checks{list-style:none; padding:0; margin:0 0 16px; display:grid; gap:8px}
+.checks li{display:grid; grid-template-columns:18px minmax(0,1fr); gap:10px; align-items:start}
+.checks li::before{content:""; width:14px; height:14px; margin-top:5px; border:1.5px solid var(--muted); border-radius:3px}
+.note{font-size:13.5px; color:var(--muted)}
+footer{margin-top:40px; padding-top:20px; border-top:1px solid var(--rule); font-size:13.5px; color:var(--muted)}
+footer ul{padding-left:18px; display:grid; gap:4px}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto!important} }
+html{scroll-behavior:smooth}
+/* v2 additions */
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:8px;font:600 14px/1 var(--body);text-decoration:none;border:1px solid var(--rule);color:var(--ink);background:var(--surface)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shot{margin:14px 0 18px;border:1px solid var(--rule);border-radius:10px;overflow:hidden;background:var(--surface);padding:0}
+.shot a{display:block}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{margin:0;padding:10px 14px;border-top:1px solid var(--rule);font-size:13px}
+.screen{padding-block:34px 6px;border-top:1px solid var(--rule)}
+.screen:first-of-type{border-top:0}
+.screen-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.screen-head h3{font:650 21px/1.2 var(--display);margin:0;letter-spacing:-.01em}
+.who{font:500 11.5px/1 var(--mono);color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:5px 9px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+.cols>*{min-width:0}
+.cols h4{font:500 11.5px/1.3 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.cols ul,.cols ol{margin:0;padding-left:20px;display:grid;gap:5px;font-size:15px}
+.meets{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.tag2{font:500 11.5px/1 var(--mono);padding:5px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.phones{display:grid;grid-template-columns:repeat(2,minmax(0,260px));gap:16px;justify-content:start}
+.phones .shot{margin:0}
+.tour{counter-reset:t;list-style:none;padding:0;margin:0 0 16px;display:grid;gap:10px}
+.tour li{counter-increment:t;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+.tour li::before{content:counter(t);width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font:600 13px/1 var(--mono)}
+.tour b{display:block}
+.tour span{color:var(--muted);font-size:14.5px}
+.status{font:500 11.5px/1 var(--mono);padding:4px 8px;border-radius:999px;white-space:nowrap;border:1px solid var(--rule);color:var(--muted)}
+.status.ok{border-color:var(--good);color:var(--good)}
+.status.sim{border-color:var(--warn);color:var(--warn)}
+.tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:8px 0 0}
+.tips div{border:1px solid var(--rule);border-radius:10px;padding:12px 14px;background:var(--surface);font-size:14px}
+.tips b{display:block;margin-bottom:3px}
+@media (max-width:760px){.cols,.tips{grid-template-columns:minmax(0,1fr)}.phones{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+</head>
+<body>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#tour">Five-minute tour</a></li>
+    <li><a href="#screens">Screen by screen</a></li>
+    <li><a href="#access">Who sees what</a></li>
+    <li><a href="#coverage">Requirements covered</a></li>
+    <li><a href="#production">Prototype vs production</a></li>
+    <li><a href="#plan">Plan &amp; cost</a></li>
+    <li><a href="#decisions">Decisions needed</a></li>
+  </ol>
+</nav>
+<main>
+<header class="hero" id="summary">
+  <p class="eyebrow">Proposal v2 · Oct 15, 2026 · Prepared by Errol Fernandes</p>
+  <h1>StaffCRM Lite, working: a CRM sized for a five-person sales team</h1>
+  <p class="lede">The proposal is now a clickable prototype. It covers <strong>every must-have in Scott’s brief</strong>, <strong>Monika’s three Tier 1 dashboards</strong>, <strong>Ryan’s event calendar</strong> and <strong>admin controls for Scott and Stephen</strong>. This guide shows each screen and how to try it.</p>
+  <div class="btn-row"><a class="btn primary" href="https://efernnds-wq.github.io/st-crmlite/staffcrm-lite-mockup.html" target="_blank" rel="noopener">Open the prototype ↗</a><a class="btn" href="index.html">Read the original proposal</a></div>
+  <ul class="stages" aria-label="Pipeline stages">
+    <li>Lead</li><li class="arr" aria-hidden="true">→</li><li>MQL</li><li class="arr" aria-hidden="true">→</li><li>SQL</li><li class="arr" aria-hidden="true">→</li><li>Opportunity</li><li class="arr" aria-hidden="true">→</li><li class="won">Closed Won</li><li>Closed Lost</li>
+  </ul>
+  <div class="facts">
+    <div><b>12 screens</b><span>Clickable, on desktop and phone</span></div>
+    <div><b>6 people</b><span>Each sees the pages their role allows</span></div>
+    <div><b>~$3–6K / yr</b><span>Estimated run cost vs ~$15K for HubSpot</span></div>
+  </div>
+</header>
+
+<section id="tour">
+  <h2>Try it in five minutes</h2>
+  <p class="point">Follow these steps in order; each one shows a different person’s job.</p>
+  <ol class="tour">
+    <li><div><b>Sign in as Scott</b><span>Open the prototype, choose Scott, select Continue.</span></div></li>
+    <li><div><b>Move a deal</b><span>Pipeline → change <i>Finance transformation team</i> to Opportunity. A follow-up task appears.</span></div></li>
+    <li><div><b>Open an account</b><span>Companies → Northstar Health. Read the AI summary, then log a note in the timeline.</span></div></li>
+    <li><div><b>Work the queue</b><span>My tasks → Work my queue → Start. Pick a template and send.</span></div></li>
+    <li><div><b>Switch to Ryan</b><span>Sign out, choose Ryan, open Events. Select <i>Preview this week’s email</i>.</span></div></li>
+    <li><div><b>Switch to Danny</b><span>Reports for the leadership dashboards, then Events → Budget &amp; ROI.</span></div></li>
+    <li><div><b>Back to Scott as admin</b><span>Settings → Admin → Onboard user. The new person appears on the sign-in screen.</span></div></li>
+  </ol>
+  <div class="tips">
+    <div><b>Your own sandbox</b>Changes save in your browser only. Other people won’t see them.</div>
+    <div><b>Start over</b>Select <i>Reset demo</i> at the top right to restore the sample data.</div>
+    <div><b>Sample data</b>Names, deals, events and costs are illustrative, not Softensity’s real figures.</div>
+  </div>
+</section>
+
+<section id="screens">
+  <h2>Screen by screen</h2>
+  <p class="point">Select any screenshot to open it full size. Each screen lists the requirement it answers.</p>
+  <div class="screen" id="s-signin"><div class="screen-head"><h3>Sign-in</h3><span class="who">Everyone</span></div><p class="point" style="margin-top:8px">Pick a person to see StaffCRM Lite as they would. Each person gets their own pages and permissions.</p><figure class="shot"><a href="assets/screens/01-signin.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Sign-in screen with six people to choose from"><img src="assets/screens/01-signin.jpg" width="1440" height="900" loading="lazy" alt="Sign-in screen with six people to choose from"></a><figcaption>Prototype sign-in. In production this is Microsoft 365 single sign-on.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Danny (CEO), Monika (CSO), Ronnie (COO), Scott (VP Sales), Stephen (Marketing Manager), Ryan (Business Sales Manager)</li><li>Anyone an admin onboards appears here; offboarded people disappear</li></ul></div><div><h4>Try this</h4><ol><li>Choose Scott and select <b>Continue as Scott</b></li><li>Use <b>Sign out</b> (top right) to switch people</li></ol></div></div><div class="meets"><span class="tag2">Permissions & visibility</span><span class="tag2">Owner assignment</span></div></div><div class="screen" id="s-overview"><div class="screen-head"><h3>Overview</h3><span class="who">Scott</span></div><p class="point" style="margin-top:8px">The week at a glance: weighted forecast, open deals, closed won this quarter and what is due today.</p><figure class="shot"><a href="assets/screens/02-overview.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Overview with pipeline totals, stage bars, priority tasks and recent activity"><img src="assets/screens/02-overview.jpg" width="1440" height="900" loading="lazy" alt="Overview with pipeline totals, stage bars, priority tasks and recent activity"></a><figcaption>Overview after sign-in.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Weighted forecast and open pipeline at range midpoint</li><li>Pipeline by stage, priority tasks with Overdue and Today flags</li><li>Recent activity across accounts</li></ul></div><div><h4>Try this</h4><ol><li>Tick a priority task to complete it</li><li>Select <b>View pipeline</b> to jump to the board</li></ol></div></div><div class="meets"><span class="tag2">Reporting & forecasting</span><span class="tag2">Tasks</span></div></div><div class="screen" id="s-pipeline"><div class="screen-head"><h3>Pipeline</h3><span class="who">Scott</span></div><p class="point" style="margin-top:8px">A kanban board from Lead to Closed Won and Closed Lost. Every stage change stamps a date and creates the next task.</p><figure class="shot"><a href="assets/screens/03-pipeline.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Kanban pipeline with six stage columns and deal cards"><img src="assets/screens/03-pipeline.jpg" width="1440" height="900" loading="lazy" alt="Kanban pipeline with six stage columns and deal cards"></a><figcaption>Cards show value, owner, lead source and days in stage (red after 45 days).</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Value as a low–high range until the deal is priced; probability by stage</li><li>Hot / warm / cold score, lead source chip, days in stage</li><li>Filters for owner, type and lead source</li><li>BD cost tracking per opportunity</li></ul></div><div><h4>Try this</h4><ol><li>Change <i>Finance transformation team</i> from SQL to Opportunity and watch the toast: a follow-up task is created</li><li>Move a deal to Closed Lost: a loss reason is required</li><li>Filter <b>All sources → Round table</b></li></ol></div></div><div class="meets"><span class="tag2">Pipeline board</span><span class="tag2">Lifecycle stages</span><span class="tag2">Stage timestamps</span><span class="tag2">Deal value & probability</span><span class="tag2">Next-action reminders</span><span class="tag2">Loss reasons</span></div></div><div class="screen" id="s-companies"><div class="screen-head"><h3>Companies</h3><span class="who">Scott</span></div><p class="point" style="margin-top:8px">Every account in one place, keyed by web domain, with its people, deals, stage history and a timeline of every touch.</p><figure class="shot"><a href="assets/screens/04-company.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Northstar Health company page with AI summary, opportunities and activity timeline"><img src="assets/screens/04-company.jpg" width="1440" height="900" loading="lazy" alt="Northstar Health company page with AI summary, opportunities and activity timeline"></a><figcaption>The AI account summary answers “what did they tell you?” in one paragraph.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Parent and subsidiary roll-up (Cox Automotive under Cox Enterprises)</li><li>Opportunities with full stage history and days in stage</li><li>Timeline of emails, meetings, calls, LinkedIn messages, notes and stage changes; filter by person</li></ul></div><div><h4>Try this</h4><ol><li>Open <b>Companies → Cox Enterprises</b> to see the roll-up</li><li>Log a note in the timeline and watch the summary update</li><li>Filter the timeline to one contact</li></ol></div></div><div class="meets"><span class="tag2">Companies as records</span><span class="tag2">Notes at every interaction</span><span class="tag2">Outlook history</span><span class="tag2">Duplicate prevention</span></div></div><div class="screen" id="s-capture"><div class="screen-head"><h3>LinkedIn capture with ZoomInfo</h3><span class="who">Scott</span></div><p class="point" style="margin-top:8px">Paste a LinkedIn profile URL and ZoomInfo fills in the person and creates the company.</p><figure class="shot"><a href="assets/screens/08-linkedin-zoominfo.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Capture LinkedIn contact form with ZoomInfo results"><img src="assets/screens/08-linkedin-zoominfo.jpg" width="1440" height="900" loading="lazy" alt="Capture LinkedIn contact form with ZoomInfo results"></a><figcaption>LinkedIn has no open profile API, so capture is by URL; ZoomInfo supplies the details.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Name, title, work email and company filled from ZoomInfo</li><li>Company created with industry, headcount and description</li><li>Lead source set to LinkedIn automatically</li></ul></div><div><h4>Try this</h4><ol><li>Open <b>Contacts → Capture LinkedIn URL</b></li><li>Paste any profile URL and select <b>Look up in ZoomInfo</b></li><li>Save, then find the new company under Companies</li></ol></div></div><div class="meets"><span class="tag2">Lead capture (LinkedIn / ZoomInfo)</span><span class="tag2">Lead source</span></div></div><div class="screen" id="s-queue"><div class="screen-head"><h3>My tasks and the work queue</h3><span class="who">Scott</span></div><p class="point" style="margin-top:8px">Overdue, today and upcoming tasks, plus a queue that opens each task as an email, one at a time.</p><figure class="shot"><a href="assets/screens/05-queue.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Work my queue dialog showing task 2 of 3 with an email draft and template picker"><img src="assets/screens/05-queue.jpg" width="1440" height="900" loading="lazy" alt="Work my queue dialog showing task 2 of 3 with an email draft and template picker"></a><figcaption>The queue blocks anyone on the suppression list.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Overdue / Today / Upcoming / Completed columns with snooze</li><li>Templates from the shared content library and cadences</li><li>Your email signature from Settings</li></ul></div><div><h4>Try this</h4><ol><li>Open <b>My tasks → Work my queue</b></li><li>Leave the tasks ticked and select <b>Start</b></li><li>Pick a template, then <b>Send via Outlook &amp; complete</b></li></ol></div></div><div class="meets"><span class="tag2">Task board</span><span class="tag2">Email queue</span><span class="tag2">Suppression list</span></div></div><div class="screen" id="s-cadences"><div class="screen-head"><h3>Cadences</h3><span class="who">Scott</span></div><p class="point" style="margin-top:8px">Short sequences of 3–5 emails that stop the moment someone replies, bounces or unsubscribes.</p><figure class="shot"><a href="assets/screens/06-cadences.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Cadences screen with steps and enrolled contacts"><img src="assets/screens/06-cadences.jpg" width="1440" height="900" loading="lazy" alt="Cadences screen with steps and enrolled contacts"></a><figcaption>Unsubscribes go straight to the permanent suppression list.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Round table alumni invite, AI readiness follow-up, post-event thank-you</li><li>Steps with business-day gaps; reply rate, bounces, unsubscribes</li><li>Enrolled contacts with their next send date</li></ul></div><div><h4>Try this</h4><ol><li>Select <b>Log reply</b> on an active contact: they leave the cadence and a task is created</li><li>Select <b>Unsubscribed</b>: they join the suppression list</li><li>Use <b>Enroll contacts</b>; suppressed people can’t be picked</li></ol></div></div><div class="meets"><span class="tag2">Sales cadence</span><span class="tag2">Auto-remove on reply or unsubscribe</span><span class="tag2">Suppression list (legal)</span></div></div><div class="screen" id="s-nurture"><div class="screen-head"><h3>Nurture and content library</h3><span class="who">Stephen or Scott</span></div><p class="point" style="margin-top:8px">A monthly content drop for leads nobody is actively working, from one library shared with cadences.</p><figure class="shot"><a href="assets/screens/07-nurture.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Nurture program with members and the shared content library"><img src="assets/screens/07-nurture.jpg" width="1440" height="900" loading="lazy" alt="Nurture program with members and the shared content library"></a><figcaption>A reply moves the lead back to active follow-up and out of the drip.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Members can also be in a cadence at the same time</li><li>Next drop chosen from the library</li><li>Round table summaries, case studies, invites, holiday greeting, email templates</li></ul></div><div><h4>Try this</h4><ol><li>Select <b>Log reply</b> on a member to re-engage them</li><li>Select <b>Add dormant leads</b> to see suggested leads</li><li>Select <b>Send next drop now</b> (simulated)</li></ol></div></div><div class="meets"><span class="tag2">Marketing nurture</span><span class="tag2">Content library</span><span class="tag2">Re-engagement</span></div></div><div class="screen" id="s-events"><div class="screen-head"><h3>Event calendar</h3><span class="who">Ryan</span></div><p class="point" style="margin-top:8px">Atlanta and Southeast events from Marketing in one calendar, with who is going and email reminders.</p><figure class="shot"><a href="assets/screens/09-events.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Event calendar for October with colored event chips and an event detail panel"><img src="assets/screens/09-events.jpg" width="1440" height="900" loading="lazy" alt="Event calendar for October with colored event chips and an event detail panel"></a><figcaption>Colors show the event type: conference, networking, speaking, panel, gala, golf.</figcaption></figure><figure class="shot"><a href="assets/screens/10-reminder.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Weekly reminder email preview listing three events"><img src="assets/screens/10-reminder.jpg" width="1440" height="900" loading="lazy" alt="Weekly reminder email preview listing three events"></a><figcaption>Preview this week’s email: what Ryan receives every Monday.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>TAG, WIT, ATP, Fintech, TechNorth, Data &amp; AI, Techbridge golf and Softensity round tables</li><li>Role (attendee, speaker, moderator, sponsor), cost, status, who is going</li><li>Filters for series, type, region and “only events I’m going to”</li></ul></div><div><h4>Try this</h4><ol><li>Sign in as <b>Ryan</b> and open <b>Events</b></li><li>Select an event, then <b>I’m going</b> or <b>Add to Outlook calendar</b></li><li>Select <b>Import events from Marketing</b> to see Stephen’s CSV import</li></ol></div></div><div class="meets"><span class="tag2">Ryan’s event requirement</span><span class="tag2">Stephen’s import</span><span class="tag2">Round table registration</span></div></div><div class="screen" id="s-reports"><div class="screen-head"><h3>Leadership reports</h3><span class="who">Danny</span></div><p class="point" style="margin-top:8px">Monika’s three Tier 1 dashboards, plus lead source ROI and BD investment, for the leadership group.</p><figure class="shot"><a href="assets/screens/11-reports.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Reports with executive KPIs, pipeline by stage, revenue by account and forecast by month"><img src="assets/screens/11-reports.jpg" width="1440" height="900" loading="lazy" alt="Reports with executive KPIs, pipeline by stage, revenue by account and forecast by month"></a><figcaption>Win rate, average deal size, sales cycle and forecast by close month.</figcaption></figure><figure class="shot"><a href="assets/screens/12-reports-locked.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Reports as Ryan with leadership dashboards locked"><img src="assets/screens/12-reports-locked.jpg" width="1440" height="900" loading="lazy" alt="Reports as Ryan with leadership dashboards locked"></a><figcaption>What Ryan sees: operational reports only, with a note on how to request access.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Executive revenue &amp; pipeline, sales rep performance with quota attainment</li><li>Pipeline conversion stage to stage, lost reasons, operating digest</li><li>Lead source ROI and BD investment against won deals</li></ul></div><div><h4>Try this</h4><ol><li>Sign in as <b>Danny</b> and open <b>Reports</b></li><li>Select <b>Preview Monday digest</b></li><li>Sign in as <b>Ryan</b>: the leadership panels are replaced by a locked card</li></ol></div></div><div class="meets"><span class="tag2">Monika’s Tier 1 dashboards</span><span class="tag2">Reporting & forecasting</span><span class="tag2">Leadership-only visibility</span></div></div><div class="screen" id="s-budget"><div class="screen-head"><h3>Event budget and ROI</h3><span class="who">Danny</span></div><p class="point" style="margin-top:8px">Where to spend the marketing budget next, based on what each event series has returned.</p><figure class="shot"><a href="assets/screens/15-budget.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Event budget and ROI tab with committed and considering spend, return by series and decisions"><img src="assets/screens/15-budget.jpg" width="1440" height="900" loading="lazy" alt="Event budget and ROI tab with committed and considering spend, return by series and decisions"></a><figcaption>Committed vs considering spend by month, and a decision on each upcoming event.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Return by series (e.g. TAG’s won value per dollar spent)</li><li>Each upcoming event shows its series’ track record</li><li>Past events traced to leads, opportunities and won deals</li></ul></div><div><h4>Try this</h4><ol><li>As Danny, open <b>Events → Budget &amp; ROI</b></li><li>Change an event from Considering to Committed</li><li>Create an opportunity with a <b>Source event</b> to link it</li></ol></div></div><div class="meets"><span class="tag2">CEO marketing budget view</span><span class="tag2">Event ROI</span></div></div><div class="screen" id="s-settings"><div class="screen-head"><h3>Settings and Admin</h3><span class="who">Scott or Stephen</span></div><p class="point" style="margin-top:8px">Everyone has Settings; admins also onboard and offboard people and decide who sees leadership views.</p><figure class="shot"><a href="assets/screens/13-admin.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Admin tab listing users with role, admin and leadership access toggles"><img src="assets/screens/13-admin.jpg" width="1440" height="900" loading="lazy" alt="Admin tab listing users with role, admin and leadership access toggles"></a><figcaption>Admins can’t change their own rights, and every change is logged.</figcaption></figure><figure class="shot"><a href="assets/screens/14-settings.jpg" target="_blank" rel="noopener" aria-label="Open full-size screenshot: Personal settings with profile, notifications and connected accounts"><img src="assets/screens/14-settings.jpg" width="1440" height="900" loading="lazy" alt="Personal settings with profile, notifications and connected accounts"></a><figcaption>Personal settings: landing page, signature, notifications, connected accounts, what you can see.</figcaption></figure><div class="cols"><div><h4>What it shows</h4><ul><li>Onboard: role, quota, admin, leadership access, welcome email</li><li>Offboard: reassign deals, contacts, tasks and cadences in one step</li><li>Role access matrix and own-vs-all records</li></ul></div><div><h4>Try this</h4><ol><li>As Scott, open <b>Settings → Admin</b> and select <b>Onboard user</b></li><li>Sign out: the new person is on the sign-in screen</li><li>Offboard someone and check the activity log</li></ol></div></div><div class="meets"><span class="tag2">Permissions & visibility</span><span class="tag2">Onboarding / offboarding</span><span class="tag2">Audit trail</span></div></div>
+  <div class="screen" id="s-phone"><div class="screen-head"><h3>On a phone</h3><span class="who">Everyone</span></div><p class="point" style="margin-top:8px">The same prototype works on a phone, so Ryan can check events and capture notes on the floor.</p><div class="phones"><figure class="shot"><a href="assets/screens/16-phone-events.jpg" target="_blank" rel="noopener"><img src="assets/screens/16-phone-events.jpg" width="780" height="1688" loading="lazy" alt="Event list on a phone"></a><figcaption>Events become a list on small screens.</figcaption></figure><figure class="shot"><a href="assets/screens/17-phone-overview.jpg" target="_blank" rel="noopener"><img src="assets/screens/17-phone-overview.jpg" width="780" height="1688" loading="lazy" alt="Overview on a phone"></a><figcaption>Overview on a phone.</figcaption></figure></div></div>
+</section>
+
+<section id="access">
+  <h2>Who sees what</h2>
+  <p class="point">Leadership views are limited to the CEO, CSO and COO plus anyone an admin grants. Scott and Stephen are the admins. These are the prototype’s defaults; admins can change them.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Person</th><th>Role</th><th>Admin</th><th>Leadership dashboards &amp; event budget</th><th>Everything else</th></tr></thead>
+    <tbody>
+      <tr><td>Danny · CEO</td><td>Leadership</td><td>—</td><td><span class="status ok">Yes</span></td><td>All areas</td></tr>
+      <tr><td>Monika · CSO</td><td>Leadership</td><td>—</td><td><span class="status ok">Yes</span></td><td>All areas; reviews event photos</td></tr>
+      <tr><td>Ronnie · COO</td><td>Leadership</td><td>—</td><td><span class="status ok">Yes</span></td><td>All areas</td></tr>
+      <tr><td>Scott · VP Sales</td><td>Sales</td><td><span class="status ok">Yes</span></td><td><span class="status ok">Granted</span></td><td>All areas</td></tr>
+      <tr><td>Stephen · Marketing Manager</td><td>Marketing</td><td><span class="status ok">Yes</span></td><td>No</td><td>All except Pipeline</td></tr>
+      <tr><td>Ryan · Business Sales Manager</td><td>Sales</td><td>—</td><td>No</td><td>All areas</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="coverage">
+  <h2>Requirements covered</h2>
+  <p class="point">Every requirement gathered so far has a home in the prototype. “Working” means it behaves as it would in production; “Simulated” means the screen and flow are real but the outside connection is faked.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Requirement</th><th>From</th><th>Where to find it</th><th>Prototype</th></tr></thead>
+    <tbody><tr><td>Pipeline board, lifecycle stages, owner assignment</td><td>Scott · Pillar 1</td><td>Pipeline</td><td><span class="status ok">Working</span></td></tr><tr><td>Lead scoring and lead source</td><td>Scott · Pillar 1</td><td>Pipeline, Contacts, Reports</td><td><span class="status ok">Working</span></td></tr><tr><td>Stage timestamps, deal value &amp; probability</td><td>Scott · Pillar 1</td><td>Pipeline, Companies</td><td><span class="status ok">Working</span></td></tr><tr><td>Notes and Outlook history</td><td>Scott · Pillar 1</td><td>Companies timeline</td><td><span class="status sim">Simulated</span></td></tr><tr><td>Lead capture from LinkedIn / ZoomInfo</td><td>Scott · Pillar 1</td><td>Contacts → Capture LinkedIn URL</td><td><span class="status sim">Simulated</span></td></tr><tr><td>Next-action reminders</td><td>Scott · Pillar 1</td><td>Auto task on every stage change</td><td><span class="status ok">Working</span></td></tr><tr><td>Sales cadence, auto-remove on reply / unsubscribe</td><td>Scott · Pillar 2</td><td>Cadences</td><td><span class="status sim">Simulated</span></td></tr><tr><td>Marketing nurture and content library</td><td>Scott · Pillar 3</td><td>Nurture</td><td><span class="status sim">Simulated</span></td></tr><tr><td>Task board and email queue</td><td>Scott · Pillar 4</td><td>My tasks → Work my queue</td><td><span class="status ok">Working</span></td></tr><tr><td>Companies as records, Closed Won / Lost, loss reasons</td><td>Scott · Pillar 5</td><td>Companies, Pipeline</td><td><span class="status ok">Working</span></td></tr><tr><td>HubSpot migration</td><td>Scott · Pillar 5</td><td>Contacts → Import from HubSpot (preview)</td><td><span class="status sim">Simulated</span></td></tr><tr><td>Suppression list (legal)</td><td>Scott · Foundations</td><td>Contacts, Cadences, Queue</td><td><span class="status ok">Working</span></td></tr><tr><td>Permissions &amp; visibility</td><td>Scott · Foundations</td><td>Settings → Admin</td><td><span class="status ok">Working</span></td></tr><tr><td>Backups &amp; export</td><td>Scott · Foundations</td><td>Reports → Download full backup</td><td><span class="status ok">Working</span></td></tr><tr><td>Executive revenue &amp; pipeline</td><td>Monika · Tier 1</td><td>Reports</td><td><span class="status ok">Working</span></td></tr><tr><td>Sales rep performance with quota attainment</td><td>Monika · Tier 1</td><td>Reports</td><td><span class="status ok">Working</span></td></tr><tr><td>Pipeline conversion and lost reasons</td><td>Monika · Tier 1</td><td>Reports</td><td><span class="status ok">Working</span></td></tr><tr><td>Event calendar and email reminders</td><td>Ryan</td><td>Events</td><td><span class="status sim">Simulated</span></td></tr><tr><td>Event import from Marketing</td><td>Stephen</td><td>Events → Import events from Marketing</td><td><span class="status ok">Working</span></td></tr><tr><td>Marketing budget and event ROI</td><td>Danny</td><td>Events → Budget &amp; ROI</td><td><span class="status ok">Working</span></td></tr><tr><td>Onboard / offboard users, leadership access</td><td>Scott &amp; Stephen</td><td>Settings → Admin</td><td><span class="status ok">Working</span></td></tr><tr><td>Round table registration import (Janium)</td><td>Sessions</td><td>Events → Import registration sheet</td><td><span class="status sim">Simulated</span></td></tr></tbody>
+  </table></div>
+  <p class="note">Still open from Scott’s list (Phase 3): custom fields, open and click tracking, automated data-hygiene checks.</p>
+</section>
+
+<section id="production">
+  <h2>Prototype vs production build</h2>
+  <p class="point">The screens carry over to production unchanged; what changes is that the data becomes shared and the connections become real.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Area</th><th>In the prototype</th><th>In production</th></tr></thead>
+    <tbody><tr><td>Sign-in</td><td>Pick a person</td><td>Microsoft 365 single sign-on (Entra ID); admins add people to a StaffCRM group</td></tr><tr><td>Data storage</td><td>Saved in your own browser only</td><td>Azure Database for PostgreSQL shared by the whole team, with nightly backups</td></tr><tr><td>Email and meetings</td><td>Sample timeline entries</td><td>Outlook mail and calendar sync through Microsoft Graph for known contacts</td></tr><tr><td>Sending email</td><td>Logged, not sent; drafts can open in Outlook</td><td>Sent from each person’s own mailbox; replies and bounces stop cadences automatically</td></tr><tr><td>ZoomInfo</td><td>Sample company returned</td><td>ZoomInfo API (search free, enrich on save) or CSV if the license has no API</td></tr><tr><td>LinkedIn</td><td>URL capture</td><td>URL capture plus Janium exports; no LinkedIn profile API is available</td></tr><tr><td>AI account summary</td><td>Assembled from the timeline</td><td>Azure OpenAI in the firm’s own tenant; nothing sent without approval</td></tr><tr><td>Reminder and digest emails</td><td>Previews only</td><td>Scheduled emails on Mondays and the 1st of the month</td></tr><tr><td>HubSpot and Janium imports</td><td>Previews and sample rows</td><td>Real imports with matching on email, LinkedIn URL and company domain</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="plan">
+  <h2>Plan and cost</h2>
+  <p class="point">With approval by Oct 30, Phase 1 runs Nov 2 – Dec 31, both systems run in parallel in early January, and HubSpot can be canceled around Jan 18, 2027.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Phase</th><th>When</th><th>Scope</th><th>Effort (hours)</th></tr></thead>
+    <tbody>
+      <tr><td>Prototype</td><td>Done</td><td>Everything in this guide</td><td class="mono">—</td></tr>
+      <tr><td>Phase 1</td><td>Nov 2 – Dec 31</td><td>Production build of all “Working” and “Simulated” items, Outlook, ZoomInfo, HubSpot migration</td><td class="mono">780–970</td></tr>
+      <tr><td>Parallel run &amp; cutover</td><td>Jan 4 – Jan 18</td><td>Reconcile migrated data, verify Outlook sync for every user, Monika signs off dashboards</td><td class="mono">incl.</td></tr>
+      <tr><td>Phase 2–3</td><td>Jan – Mar 2027</td><td>Custom fields, open/click tracking, data hygiene, Zoho recruiting handoff</td><td class="mono">400–560</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Phase 1 is up from the original 700–850 hours because the event calendar, event budget and admin controls joined the scope. Run cost is unchanged: about $2.5–5K a year for Azure hosting plus $0.3–1K for AI, against about $15K a year for HubSpot. These are estimates to confirm with the Azure pricing calculator. Full detail is in the <a href="index.html#cost">original proposal</a>.</p>
+</section>
+
+<section id="decisions">
+  <h2>Decisions needed</h2>
+  <p class="point">Most of these can be settled in the demo itself.</p>
+  <ul class="checks">
+    <li>Approve the production build, and decide who builds it: the firm’s developers, Errol, or both.</li>
+    <li>Confirm the HubSpot renewal date, which sets the cutover deadline.</li>
+    <li>Pick the stage names: Scott’s (Lead, MQL, SQL, Opportunity) or Monika’s (Lead, Account, Meeting, Deal); keep or drop “SQL Potential”.</li>
+    <li>Confirm who gets leadership access beyond the CEO, CSO and COO, and whether Marketing should see the Pipeline.</li>
+    <li>Agree who approves event spend in Budget &amp; ROI, and any dollar threshold.</li>
+    <li>Confirm Stephen’s event list can be exported as CSV in the template’s columns.</li>
+    <li>Confirm the ZoomInfo license includes API access.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Links</p>
+  <ul>
+    <li><a href="https://efernnds-wq.github.io/st-crmlite/staffcrm-lite-mockup.html" target="_blank" rel="noopener">StaffCRM Lite prototype</a></li>
+    <li><a href="index.html">Original proposal: architecture, integrations, security and full cost detail</a></li>
+  </ul>
+</footer>
+</main>
+</div>
+</body>
+</html>
