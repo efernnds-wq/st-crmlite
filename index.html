@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Proposal to replace HubSpot with a Microsoft 365-native CRM: scope, architecture, integrations, dashboards, plan and cost.">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>StaffCRM Lite Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650&family=Public+Sans:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: proposal reads top-down in one ~760px column; a sticky contents rail sits left on wide screens; the pipeline stage strip is the signature motif. */
+:root{
+  --bg:#F5F7FA; --surface:#FFFFFF; --ink:#15202D; --muted:#566275; --rule:#D9DFE7;
+  --accent:#1D5BD0; --accent-soft:#E6EEFC; --good:#1E7A4F; --warn:#9A5B00; --tint:#EEF1F5;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#97A3B4; --rule:#2A3442;
+  --accent:#78A2FF; --accent-soft:#1B2840; --good:#5CC492; --warn:#E3A84A; --tint:#19212C; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#97A3B4; --rule:#2A3442;
+  --accent:#78A2FF; --accent-soft:#1B2840; --good:#5CC492; --warn:#E3A84A; --tint:#19212C; color-scheme:dark }
+
+body{background:var(--bg); color:var(--ink); font:16px/1.6 var(--body);
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:0 64px}
+.shell{max-width:1120px; margin:0 auto; display:grid; grid-template-columns:200px minmax(0,1fr); gap:56px}
+@media (max-width:900px){ .shell{grid-template-columns:minmax(0,1fr)} nav.toc{display:none} }
+
+nav.toc{position:sticky; top:calc(env(safe-area-inset-top,0px) + 32px); align-self:start; padding-top:40px; font-size:13px}
+nav.toc p{font:500 11px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 12px}
+nav.toc ol{list-style:none; margin:0; padding:0; display:grid; gap:6px; counter-reset:t}
+nav.toc a{color:var(--muted); text-decoration:none; display:block; padding:2px 0 2px 10px; border-left:2px solid var(--rule)}
+nav.toc a:hover, nav.toc a:focus-visible{color:var(--ink); border-left-color:var(--accent); outline:none}
+
+main{min-width:0; max-width:780px}
+header.hero{padding-block:48px 32px; border-bottom:1px solid var(--rule)}
+.eyebrow{font:500 12px/1.4 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 16px}
+h1{font:650 clamp(34px,5.4vw,54px)/1.05 var(--display); letter-spacing:-.02em; margin:0 0 16px; text-wrap:balance}
+.lede{font-size:19px; line-height:1.55; max-width:62ch; margin:0 0 28px; color:var(--ink)}
+.lede strong{font-weight:600}
+
+/* pipeline strip: the subject's own vocabulary */
+.stages{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:0 0 28px; padding:0; list-style:none; font:500 12.5px/1 var(--mono)}
+.stages li{padding:8px 12px; border:1px solid var(--rule); border-radius:999px; background:var(--surface); color:var(--muted)}
+.stages li.won{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.stages .arr{border:0; background:none; padding:0 2px; color:var(--muted)}
+
+.facts{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:10px; overflow:hidden}
+.facts div{background:var(--surface); padding:16px 18px}
+.facts b{display:block; font:650 24px/1.15 var(--display); letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+.facts span{font-size:13.5px; color:var(--muted)}
+@media (max-width:620px){ .facts{grid-template-columns:minmax(0,1fr)} }
+
+section{padding-block:40px 8px; scroll-margin-top:24px}
+h2{font:650 26px/1.2 var(--display); letter-spacing:-.01em; margin:0 0 12px; text-wrap:balance}
+h3{font:600 16px/1.3 var(--body); margin:28px 0 8px}
+section > p.point{font-size:17px; max-width:66ch; margin:0 0 18px}
+p, li{max-width:68ch}
+ul.plain{padding-left:20px; margin:0 0 16px; display:grid; gap:6px}
+a{color:var(--accent)}
+code, .mono{font-family:var(--mono); font-size:.88em}
+
+.tablewrap{overflow-x:auto; margin:8px 0 20px; border:1px solid var(--rule); border-radius:10px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:560px}
+th,td{text-align:left; vertical-align:top; padding:10px 14px; border-bottom:1px solid var(--rule)}
+th{font:500 11.5px/1.3 var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--muted); background:var(--tint)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+tr.rec td{background:var(--accent-soft)}
+.pill{display:inline-block; font:500 11.5px/1 var(--mono); padding:4px 8px; border-radius:999px; border:1px solid var(--rule); color:var(--muted); white-space:nowrap}
+.pill.p1{border-color:var(--accent); color:var(--accent)}
+.pill.up{border-color:var(--warn); color:var(--warn)}
+
+figure{margin:12px 0 20px; border:1px solid var(--rule); border-radius:10px; background:var(--surface); padding:20px; overflow-x:auto}
+figcaption{font-size:13.5px; color:var(--muted); margin-top:12px}
+svg text{font-family:var(--body)}
+.d-box{fill:var(--surface); stroke:var(--muted); stroke-width:1.1}
+.d-dash{stroke-dasharray:4 4}
+.d-zone{fill:var(--tint); stroke:var(--rule)}
+.d-name{fill:var(--ink); font-weight:600; font-size:13px}
+.d-line{fill:var(--muted); font-size:11.5px}
+.d-zl{fill:var(--muted); font-size:11.5px; font-weight:600}
+.d-edge{stroke:var(--muted); stroke-width:1.2; fill:none}
+.d-head{fill:var(--muted)}
+
+/* timeline */
+.gantt{display:grid; gap:10px; min-width:560px}
+.g-axis,.g-row{display:grid; grid-template-columns:130px minmax(0,1fr) 128px; gap:12px; align-items:center}
+.g-track{position:relative; height:20px}
+.g-axis .g-track{height:18px; border-bottom:1px solid var(--rule)}
+.tick{position:absolute; top:0; transform:translateX(-50%); font:500 11px/1 var(--mono); color:var(--muted)}
+.g-row .g-track::before{content:""; position:absolute; inset:9px 0 auto 0; height:1px; background:var(--rule)}
+.bar{position:absolute; top:3px; height:14px; border-radius:7px; background:var(--accent-soft); border:1px solid var(--accent)}
+.ms{position:absolute; top:3px; width:13px; height:13px; transform:translateX(-50%) rotate(45deg); background:var(--muted)}
+.ms.key{background:var(--accent)}
+.g-name{font-size:14px}
+.g-date{font:400 12px/1.2 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums}
+.g-row.key .g-name, .g-row.key .g-date{font-weight:600; color:var(--ink)}
+
+.checks{list-style:none; padding:0; margin:0 0 16px; display:grid; gap:8px}
+.checks li{display:grid; grid-template-columns:18px minmax(0,1fr); gap:10px; align-items:start}
+.checks li::before{content:""; width:14px; height:14px; margin-top:5px; border:1.5px solid var(--muted); border-radius:3px}
+.note{font-size:13.5px; color:var(--muted)}
+footer{margin-top:40px; padding-top:20px; border-top:1px solid var(--rule); font-size:13.5px; color:var(--muted)}
+footer ul{padding-left:18px; display:grid; gap:4px}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto!important} }
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p>Contents</p>
+  <ol>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#options">Options</a></li>
+    <li><a href="#scope">Scope</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#stack">Technology</a></li>
+    <li><a href="#data">Data model</a></li>
+    <li><a href="#integrations">Integrations</a></li>
+    <li><a href="#reporting">Reporting</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#plan">Delivery plan</a></li>
+    <li><a href="#cost">Cost</a></li>
+    <li><a href="#risks">Risks &amp; decisions</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero" id="summary">
+  <p class="eyebrow">Proposal · Oct 14, 2026 · Prepared by Errol Fernandes</p>
+  <h1>StaffCRM Lite: a CRM sized for a five-person sales team</h1>
+  <p class="lede">We recommend replacing HubSpot with a small CRM built on the firm's own Microsoft 365 and Azure. It covers <strong>Scott's five pillars</strong>, <strong>Monika's three Tier 1 dashboards</strong> and the round-table engine, and lets the firm cancel HubSpot in mid-January.</p>
+  <ul class="stages" aria-label="Pipeline stages">
+    <li>Lead</li><li class="arr" aria-hidden="true">→</li>
+    <li>MQL</li><li class="arr" aria-hidden="true">→</li>
+    <li>SQL</li><li class="arr" aria-hidden="true">→</li>
+    <li>Opportunity</li><li class="arr" aria-hidden="true">→</li>
+    <li class="won">Closed Won</li><li>Closed Lost</li>
+  </ul>
+  <div class="facts">
+    <div><b>8–9 weeks</b><span>Phase 1 build, starting Nov 2</span></div>
+    <div><b>~$3–6K / yr</b><span>Estimated run cost vs ~$15K for HubSpot</span></div>
+    <div><b>Jan 18, 2027</b><span>Target date to cancel HubSpot</span></div>
+  </div>
+</header>
+
+<section id="what">
+  <h2>What it delivers</h2>
+  <ul class="plain">
+    <li><b>Scott's five pillars:</b> pipeline, cadences, nurture, tasks and structure, plus the foundations he flagged, including a legally required suppression list.</li>
+    <li><b>Monika's Tier 1 dashboards:</b> executive revenue and pipeline, rep performance, and pipeline conversion, emailed weekly so nobody has to log in.</li>
+    <li><b>Round-table engine:</b> Janium registration sheets imported as prospects, with alumni tracked across sessions.</li>
+    <li><b>Integrations:</b> Outlook mail and calendar sync, ZoomInfo enrichment, LinkedIn capture within LinkedIn's terms, and a full HubSpot migration.</li>
+    <li><b>AI where it saves Scott time:</b> account summaries, meeting-note reports and follow-up drafts, running in the firm's own Azure tenant.</li>
+  </ul>
+</section>
+
+<section id="options">
+  <h2>Options considered</h2>
+  <p class="point">Building wins because the firm's sales motion (staffing deals with unknown value, round tables, a Zoho handoff) is exactly what an off-the-shelf CRM needs heavy configuration to fit, and that configuration has already failed once.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Option</th><th>1-year cost</th><th>Pros</th><th>Cons</th></tr></thead>
+    <tbody>
+      <tr class="rec"><td>A. Build StaffCRM Lite (recommended)</td><td>Build effort + ~$3–6K run</td><td>Fits a staffing business; firm owns its data; reporting designed for leadership</td><td>Firm owns maintenance; needs a developer for upkeep</td></tr>
+      <tr><td>B. Keep HubSpot, configure it properly</td><td>~$15K license + partner fee</td><td>No build; mature features</td><td>Already failed once; enterprise pricing for 4–5 seats</td></tr>
+      <tr><td>C. Move to a low-cost SaaS CRM (e.g., Zoho CRM)</td><td>Seat licenses + setup</td><td>Fast; native link to Zoho recruiting</td><td>Same configuration risk; round-table and staffing logic still custom</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="scope">
+  <h2>Scope</h2>
+  <p class="point">Every requirement from Scott's brief, Monika's dashboards and the working sessions maps to a module; nothing is dropped, only phased.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Module</th><th>Covers</th><th>Source</th><th>Phase</th></tr></thead>
+    <tbody>
+      <tr><td>Pipeline</td><td>Kanban by stage; hot/warm/cold score; source dropdown; owner; stage timestamps; notes</td><td>Scott pillar 1</td><td><span class="pill p1">1</span></td></tr>
+      <tr><td>Opportunities</td><td>Value range (low/high), probability, project or staffing type, expected close, SOW file, final value, required loss reason</td><td>Scott, Monika</td><td><span class="pill up">1 · moved up</span></td></tr>
+      <tr><td>Companies &amp; contacts</td><td>Company keyed by web domain, parent/child, dedupe on email and LinkedIn URL, search including 2-letter names like EY</td><td>Scott pillar 5</td><td><span class="pill p1">1</span> <span class="pill">saved filters 2</span></td></tr>
+      <tr><td>Activity &amp; Outlook</td><td>Auto-logged email and meetings; AI summary of history; manual call and LinkedIn logging</td><td>Scott pillars 1, 5</td><td><span class="pill p1">1</span> <span class="pill">manual log 2</span></td></tr>
+      <tr><td>Tasks</td><td>Overdue / today / upcoming; work queue opens each task as an email; snooze; auto-task on stage change</td><td>Scott pillar 4</td><td><span class="pill p1">1</span> <span class="pill">auto-task 2</span></td></tr>
+      <tr><td>Cadences</td><td>3–5 templated emails on business-day delays; exit on reply, bounce or unsubscribe</td><td>Scott pillar 2</td><td><span class="pill p1">1</span> <span class="pill">tracking 3</span></td></tr>
+      <tr><td>Nurture &amp; content</td><td>Monthly content to dormant leads; shared template library; reply returns lead to active</td><td>Scott pillar 3</td><td><span class="pill">2</span></td></tr>
+      <tr><td>Events &amp; round tables</td><td>Janium sheet import (19 columns), attendance, alumni, invite lists, post-event summary</td><td>Sessions</td><td><span class="pill p1">1</span></td></tr>
+      <tr><td>Suppression</td><td>Permanent opt-out list checked on every send and import; unsubscribe footer</td><td>Scott foundations</td><td><span class="pill p1">1</span></td></tr>
+      <tr><td>Dashboards &amp; digest</td><td>Monika's three dashboards; Scott's aging and task digest; Monday email</td><td>Monika, Scott</td><td><span class="pill up">1 · moved up</span></td></tr>
+      <tr><td>Admin</td><td>Stages, probabilities, quotas, picklists, users, audit log, custom fields</td><td>Scott foundations</td><td><span class="pill p1">1</span> <span class="pill">custom fields 3</span></td></tr>
+      <tr><td>Data platform</td><td>Nightly backup, full export, HubSpot migration</td><td>Scott foundations</td><td><span class="pill up">1 · moved up</span></td></tr>
+      <tr><td>Later</td><td>Mobile voice capture, data-hygiene jobs, Zoho staffing handoff, margin calculator, deck builder</td><td>Sessions</td><td><span class="pill">3 / later</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">"Moved up" marks items Scott's brief placed later that Monika's dashboards or the migration need in Phase 1.</p>
+</section>
+
+<section id="architecture">
+  <h2>Solution architecture</h2>
+  <p class="point">One web app and one set of background jobs share a Postgres database. Microsoft 365 handles sign-in and mail, ZoomInfo enriches records, and Janium and HubSpot feed data in by import.</p>
+  <figure>
+    <svg viewBox="0 0 760 456" width="100%" role="img" aria-label="Architecture: the CRM runs in the firm's Azure subscription beside Microsoft 365" style="min-width:600px">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="d-head" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="d-zone" x="188" y="20" width="348" height="412" rx="8"/>
+      <text class="d-zl" x="204" y="42">Firm's Azure subscription</text>
+      <rect class="d-box" x="204" y="56" width="316" height="56" rx="8"/><text class="d-name" x="362" y="80" text-anchor="middle">Web app and API</text><text class="d-line" x="362" y="96" text-anchor="middle">React PWA, Entra ID sign-in, dashboards</text>
+      <rect class="d-box" x="204" y="136" width="316" height="56" rx="8"/><text class="d-name" x="362" y="160" text-anchor="middle">Background jobs</text><text class="d-line" x="362" y="176" text-anchor="middle">mail sync, cadences, enrichment, digests</text>
+      <rect class="d-box" x="204" y="216" width="316" height="44" rx="8"/><text class="d-name" x="362" y="243" text-anchor="middle" font-weight="400">PostgreSQL: CRM records</text>
+      <rect class="d-box" x="204" y="276" width="316" height="44" rx="8"/><text class="d-name" x="362" y="303" text-anchor="middle" font-weight="400">Blob storage: imports, files, backups</text>
+      <rect class="d-box" x="204" y="336" width="316" height="44" rx="8"/><text class="d-name" x="362" y="363" text-anchor="middle" font-weight="400">Azure OpenAI: summaries, drafts</text>
+
+      <rect class="d-box" x="24" y="56" width="140" height="56" rx="8"/><text class="d-name" x="94" y="80" text-anchor="middle">Sellers</text><text class="d-line" x="94" y="96" text-anchor="middle">browser and phone</text>
+      <rect class="d-box" x="24" y="136" width="140" height="56" rx="8"/><text class="d-name" x="94" y="160" text-anchor="middle">Leadership</text><text class="d-line" x="94" y="176" text-anchor="middle">Monday email</text>
+
+      <rect class="d-box" x="560" y="56" width="176" height="56" rx="8"/><text class="d-name" x="648" y="80" text-anchor="middle">Microsoft 365</text><text class="d-line" x="648" y="96" text-anchor="middle">mail, calendar, sign-in</text>
+      <rect class="d-box" x="560" y="136" width="176" height="56" rx="8"/><text class="d-name" x="648" y="160" text-anchor="middle">ZoomInfo API</text><text class="d-line" x="648" y="176" text-anchor="middle">enrich on save</text>
+      <rect class="d-box" x="560" y="214" width="176" height="48" rx="8"/><text class="d-name" x="648" y="234" text-anchor="middle">Janium + LinkedIn</text><text class="d-line" x="648" y="251" text-anchor="middle">sheet import, URL paste</text>
+      <rect class="d-box d-dash" x="560" y="274" width="176" height="48" rx="8"/><text class="d-name" x="648" y="294" text-anchor="middle">HubSpot</text><text class="d-line" x="648" y="311" text-anchor="middle">one-time export</text>
+
+      <path class="d-edge" d="M164 84H204" marker-end="url(#ah)"/>
+      <path class="d-edge" d="M204 164H164" marker-end="url(#ah)"/>
+      <path class="d-edge" d="M520 84H560" marker-start="url(#ah)" marker-end="url(#ah)"/>
+      <path class="d-edge" d="M520 164H560" marker-start="url(#ah)" marker-end="url(#ah)"/>
+      <path class="d-edge" d="M560 238H520" marker-end="url(#ah)"/>
+      <path class="d-edge d-dash" d="M560 298H520" marker-end="url(#ah)"/>
+    </svg>
+    <figcaption>Only ZoomInfo and Janium sit outside the firm's Microsoft and Azure estate. Sellers work in the app; leadership gets the Monday email.</figcaption>
+  </figure>
+</section>
+
+<section id="stack">
+  <h2>Technology stack and hosting</h2>
+  <p class="point">Host in the firm's own Azure subscription so sign-in, mail and AI all stay inside the Microsoft 365 tenant they already run on.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Front end</td><td>React + TypeScript, installable as a PWA</td><td>One codebase for desktop and phone; no app-store release</td></tr>
+      <tr><td>API</td><td>Node.js (NestJS) or .NET, REST + webhooks</td><td>Pick whichever the firm's developers know</td></tr>
+      <tr><td>Database</td><td>Azure Database for PostgreSQL, Flexible Server</td><td>Relational fit for CRM data; point-in-time restore</td></tr>
+      <tr><td>Background jobs</td><td>Azure Functions (timers, queues)</td><td>Mail sync, cadence sends, enrichment, digests, backups</td></tr>
+      <tr><td>Sign-in</td><td>Microsoft Entra ID single sign-on</td><td>Same accounts as Outlook; no new passwords</td></tr>
+      <tr><td>Mail &amp; calendar</td><td>Microsoft Graph</td><td>Outlook sync and sending from the user's own mailbox</td></tr>
+      <tr><td>AI</td><td>Azure OpenAI in the firm's tenant</td><td>Data stays in their Azure; matches the Copilot-only policy</td></tr>
+      <tr><td>Files</td><td>Azure Blob Storage</td><td>SOWs, imports, backups</td></tr>
+      <tr><td>Dashboards</td><td>Built in; weekly email rendered server-side</td><td>Leadership reads email; Power BI can connect later</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">If the firm prefers not to run Azure, the same design runs on any cloud with Postgres; only sign-in and AI hosting change.</p>
+</section>
+
+<section id="data">
+  <h2>Data model</h2>
+  <p class="point">Company web domain, contact work email and LinkedIn URL are the three match keys. Every import and integration resolves to them before writing, which keeps duplicates like the separate Cox records out.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Table</th><th>Key fields</th><th>Unique / match on</th></tr></thead>
+    <tbody>
+      <tr><td><code>company</code></td><td>domain, name, parent_company_id, industry, headcount_band, description, linkedin_company_url, is_public, ticker, zoominfo_company_id, owner_id</td><td>domain → LinkedIn page → ZoomInfo ID</td></tr>
+      <tr><td><code>contact</code></td><td>company_id, name, title, work_email, linkedin_email, linkedin_url, phone, location, owner_id, score, lifecycle_stage, last_verified_at</td><td>work_email → linkedin_url</td></tr>
+      <tr><td><code>stage_history</code></td><td>record, from_stage, to_stage, changed_at, changed_by</td><td>Append-only; drives velocity and conversion</td></tr>
+      <tr><td><code>opportunity</code></td><td>company_id, owner_id, type, stage, value_low, value_high, value_final, probability, expected_close, loss_reason, sow_file</td><td>—</td></tr>
+      <tr><td><code>activity</code></td><td>type (email, meeting, note, call, LinkedIn message), contact, company, occurred_at, summary, graph_message_id</td><td>graph_message_id for email</td></tr>
+      <tr><td><code>task</code></td><td>owner_id, contact_id, type, due_date, status, template_id</td><td>—</td></tr>
+      <tr><td><code>event</code> / <code>event_attendance</code></td><td>type, date, topic, spotlight exec, cost / attended, introed, talked, registered_at, notes, sourced_by</td><td>event + contact</td></tr>
+      <tr><td><code>cadence</code>, <code>enrollment</code>, <code>nurture</code></td><td>steps with business-day delays; exit reason (replied, bounced, unsubscribed)</td><td>contact + cadence</td></tr>
+      <tr><td><code>suppression</code></td><td>email, domain, reason, added_at, source</td><td>email; checked before every send and import</td></tr>
+      <tr><td><code>quota</code>, settings, <code>import_batch</code>, <code>audit_log</code></td><td>targets per rep and quarter; picklists; import provenance; who changed what</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="integrations">
+  <h2>Integrations</h2>
+  <p class="point">Outlook and ZoomInfo have workable APIs. LinkedIn does not, so LinkedIn data comes in through pasted profile URLs, ZoomInfo matching and the Janium export.</p>
+
+  <h3>Outlook / Microsoft 365 (Microsoft Graph)</h3>
+  <ul class="plain">
+    <li><b>Connection:</b> each user connects once through Entra ID; admin consent for delegated mail, send and calendar permissions. Only mail to or from known contacts is stored.</li>
+    <li><b>Inbound:</b> Graph change notifications for new mail, with a <a href="https://learn.microsoft.com/en-us/graph/api/message-delta" target="_blank" rel="noopener">message delta query</a> every 15 minutes as a backstop.</li>
+    <li><b>Outbound:</b> cadence and task emails go out from the user's own mailbox, so they appear in Outlook Sent and replies land in Outlook.</li>
+    <li><b>Reply detection:</b> matched on conversation ID and sender, not the subject line, so a changed subject still stops the cadence.</li>
+    <li><b>Calendar:</b> meetings with an external contact become activities and drive "meetings booked".</li>
+    <li><b>Bounces and tracking:</b> bounces exit the cadence in Phase 1; click and open tracking arrive in Phase 3, with opens shown as indicative only.</li>
+  </ul>
+
+  <h3>ZoomInfo</h3>
+  <ul class="plain">
+    <li><b>Access:</b> the Enterprise API uses credentials issued by ZoomInfo's account team. The firm needs to confirm their package includes API access; today Scott uses the browser extension.</li>
+    <li><b>Cost control:</b> searches are free and enrichment costs credits, so the app searches first and enriches only when a record is saved. ZoomInfo states one credit per new record, and re-enriching the same record within 12 months uses no new credits.</li>
+    <li><b>Flows:</b> company enrichment on create, contact enrichment for work email and direct dial, and a quarterly check that flags people who changed employer.</li>
+    <li><b>Fallback:</b> without API access, a ZoomInfo CSV export imports through the same mapping and dedupe rules.</li>
+  </ul>
+
+  <h3>LinkedIn</h3>
+  <ul class="plain">
+    <li><b>No profile API is available.</b> LinkedIn's sales APIs require approval as a Sales Navigator Application Platform partner, and LinkedIn lists that access as closed. Scraping breaks LinkedIn's terms, so the design doesn't do it.</li>
+    <li><b>Capture:</b> paste or share a profile URL from desktop or the LinkedIn phone app; ZoomInfo fills in name, title, email and company.</li>
+    <li><b>Janium:</b> keeps running LinkedIn outreach and round-table registration; its 19-column sheet imports as prospects.</li>
+  </ul>
+
+  <h3>HubSpot migration</h3>
+  <ul class="plain">
+    <li>Export contacts, companies, deals, notes, emails, meetings, tasks, sequence templates and the round-table alumni list.</li>
+    <li>Run every row through the match keys and merge duplicate companies under their parents.</li>
+    <li>Proposal: import contacts with activity in the last 3 years plus all alumni, out of roughly 34–38K, and archive the rest as a file.</li>
+    <li>Reconcile counts, run both systems in parallel for two weeks, then cancel HubSpot.</li>
+  </ul>
+
+  <h3>Round tables, Read AI and AI services</h3>
+  <ul class="plain">
+    <li>Round-table sheets upload with a saved column map; a webhook later if Janium supports one.</li>
+    <li>Read AI transcripts are uploaded or forwarded, and AI drafts the opportunity report into notes.</li>
+    <li>Azure OpenAI writes account summaries, event follow-up drafts and the digest's narrative line. Nothing is sent without the user approving it.</li>
+  </ul>
+</section>
+
+<section id="reporting">
+  <h2>Reporting and dashboards</h2>
+  <p class="point">All three of Monika's Tier 1 dashboards ship in Phase 1, computed from stage history and opportunity values, and each is emailed Monday at 7 a.m. Eastern.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Dashboard</th><th>Audience</th><th>KPIs</th><th>Calculation rules</th></tr></thead>
+    <tbody>
+      <tr><td>Executive Revenue &amp; Pipeline</td><td>Danny, Ronnie, leadership</td><td>Pipeline total and by stage, forecast, Closed Won, win rate, average deal size, cycle length, revenue by salesperson and account</td><td>Open value = range midpoint until final; forecast = value × stage probability by close month; cycle = median days Lead → Closed Won</td></tr>
+      <tr><td>Sales Rep Performance</td><td>Leadership, each rep</td><td>Revenue, opportunities created and won, win rate, meetings booked, pipeline generated, activity, quota attainment</td><td>Meetings = Outlook meetings with an external contact; attainment = Closed Won ÷ quarterly quota</td></tr>
+      <tr><td>Pipeline Conversion</td><td>Leadership, Scott</td><td>Lead → Account → Meeting → Deal → Won / Lost, lost reasons</td><td>Cohort-based share reaching the next stage; stage names mapped once Monika's funnel terms are confirmed</td></tr>
+      <tr><td>Scott's operating digest</td><td>Scott</td><td>Aging by stage, overdue tasks, cadence results, lead-source ROI, new registrants</td><td>Aging flag when time in stage passes an admin-set threshold</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Revenue means signed contract value until finance confirms otherwise; billed revenue would need a feed from finance or Zoho.</p>
+</section>
+
+<section id="security">
+  <h2>Security, compliance and backups</h2>
+  <p class="point">The suppression list is the one non-negotiable control. CAN-SPAM penalties are assessed per email, up to $53,088 each after the FTC's 2025 inflation adjustment, and the law makes no exception for business-to-business email.</p>
+  <ul class="plain">
+    <li><b>CAN-SPAM:</b> every commercial email carries a working unsubscribe link and the firm's postal address. Unsubscribes go to a permanent list that every send and import checks.</li>
+    <li><b>Access:</b> Entra ID sign-in with the firm's MFA policy; Admin, Seller and Viewer roles. Sellers export only their own records.</li>
+    <li><b>Data protection:</b> encryption at rest and in transit; secrets in Azure Key Vault; API tokens never reach the browser.</li>
+    <li><b>AI data:</b> Azure OpenAI inside the firm's subscription; prompts and outputs aren't used to train models.</li>
+    <li><b>Audit log:</b> stage, picklist and record changes recorded with who and when.</li>
+    <li><b>Backups:</b> Postgres point-in-time restore plus a nightly export kept 90 days, with a quarterly restore test. Any admin can export everything at any time.</li>
+  </ul>
+</section>
+
+<section id="plan">
+  <h2>Delivery plan</h2>
+  <p class="point">With approval by Oct 30, Phase 1 finishes by year-end and HubSpot can be canceled after a two-week parallel run in January.</p>
+  <figure>
+    <div class="gantt" role="img" aria-label="Timeline from the Oct 19 prototype to the end of Phase 3 on Mar 26, 2027, with HubSpot canceled Jan 18">
+      <div class="g-axis"><span></span><div class="g-track">
+        <span class="tick" style="left:8.23%">Nov</span><span class="tick" style="left:27.22%">Dec</span><span class="tick" style="left:46.84%">Jan '27</span><span class="tick" style="left:66.46%">Feb</span><span class="tick" style="left:84.18%">Mar</span>
+      </div><span></span></div>
+      <div class="g-row"><span class="g-name">Prototype</span><div class="g-track"><span class="bar" style="left:0;width:3.8%"></span></div><span class="g-date">Oct 19 – Oct 25</span></div>
+      <div class="g-row"><span class="g-name">Prototype demo</span><div class="g-track"><span class="ms" style="left:4.43%"></span></div><span class="g-date">Oct 26</span></div>
+      <div class="g-row"><span class="g-name">Go / no-go</span><div class="g-track"><span class="ms" style="left:6.96%"></span></div><span class="g-date">Oct 30</span></div>
+      <div class="g-row"><span class="g-name">Phase 1 build</span><div class="g-track"><span class="bar" style="left:8.86%;width:37.34%"></span></div><span class="g-date">Nov 2 – Dec 31</span></div>
+      <div class="g-row"><span class="g-name">Parallel run</span><div class="g-track"><span class="bar" style="left:48.73%;width:6.96%"></span></div><span class="g-date">Jan 4 – Jan 15</span></div>
+      <div class="g-row key"><span class="g-name">Cancel HubSpot</span><div class="g-track"><span class="ms key" style="left:57.59%"></span></div><span class="g-date">Jan 18</span></div>
+      <div class="g-row"><span class="g-name">Phase 2</span><div class="g-track"><span class="bar" style="left:57.59%;width:24.68%"></span></div><span class="g-date">Jan 18 – Feb 26</span></div>
+      <div class="g-row"><span class="g-name">Phase 3</span><div class="g-track"><span class="bar" style="left:84.18%;width:15.82%"></span></div><span class="g-date">Mar 1 – Mar 26</span></div>
+    </div>
+    <figcaption>Dates shift with approval and the HubSpot renewal date. The holiday weeks fall inside Phase 1, so year-end is tight.</figcaption>
+  </figure>
+  <p><b>Gates:</b> the prototype demo decides go or no-go. Cutover requires migrated counts reconciled, Outlook sync verified for every user, and Monika signing off the three dashboards.</p>
+  <ul class="plain">
+    <li><b>Phase 2:</b> nurture and content library, next-action reminders, saved filters, call and LinkedIn logging, forecasting depth, ongoing duplicate alerts.</li>
+    <li><b>Phase 3:</b> custom fields, permissions, data hygiene, open/click tracking, mobile capture.</li>
+    <li><b>Later, not yet requested:</b> Zoho staffing handoff, margin calculator, deck builder, Dun &amp; Bradstreet hierarchy.</li>
+  </ul>
+</section>
+
+<section id="cost">
+  <h2>Cost</h2>
+  <p class="point">License savings alone are about $9–12K a year, so the stronger case is leadership finally getting reliable pipeline reporting. The build is the main investment, and its cost depends on who builds it.</p>
+  <h3>Build effort (estimate)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Phase</th><th>Duration</th><th>Team</th><th>Hours</th></tr></thead>
+    <tbody>
+      <tr><td>Prototype</td><td>1 week</td><td>Errol</td><td class="mono">30–40</td></tr>
+      <tr><td>Phase 1</td><td>8–9 weeks</td><td>2 full-stack developers; architect / PM and QA part-time</td><td class="mono">700–850</td></tr>
+      <tr><td>Phase 2</td><td>5–6 weeks</td><td>1–2 developers</td><td class="mono">300–380</td></tr>
+      <tr><td>Phase 3</td><td>4 weeks</td><td>1 developer</td><td class="mono">200–260</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Annual run cost (approximate, not yet quoted)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Item</th><th>StaffCRM Lite</th><th>HubSpot today</th></tr></thead>
+    <tbody>
+      <tr><td>Hosting</td><td class="mono">~$2.5–5K</td><td>Included</td></tr>
+      <tr><td>Azure OpenAI</td><td class="mono">~$0.3–1K</td><td>Included</td></tr>
+      <tr><td>Maintenance</td><td>4–8 hours a month</td><td>Admin time, partner fees</td></tr>
+      <tr><td>License</td><td>None</td><td class="mono">~$15K (4 seats)</td></tr>
+      <tr><td>ZoomInfo</td><td>Unchanged; API package may add cost</td><td>Unchanged</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Payback in years = build cost ÷ (HubSpot license − run cost − maintenance). The firm's own developers can build it at internal rates. Azure figures are typical small-tier estimates to confirm with the Azure pricing calculator.</p>
+</section>
+
+<section id="risks">
+  <h2>Risks, assumptions and decisions</h2>
+  <p class="point">The biggest risk is the HubSpot renewal date: if it lands before Phase 1 finishes, the firm pays for another term or cuts over early.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>HubSpot renews before cutover</td><td>Another year of license</td><td>Confirm the date now; negotiate a short extension</td></tr>
+      <tr><td>ZoomInfo package has no API</td><td>Manual enrichment</td><td>CSV fallback built in; price the API add-on</td></tr>
+      <tr><td>Low adoption, as with HubSpot</td><td>Reports stay empty</td><td>Scott co-designs; Outlook auto-logging; leadership gets email, not logins</td></tr>
+      <tr><td>Stale or duplicate migrated data</td><td>Bad reports from day one</td><td>Import filter, match keys, parallel run</td></tr>
+      <tr><td>Developer leaves</td><td>Maintenance stalls</td><td>Standard stack, documented, owned by the firm's dev team</td></tr>
+      <tr><td>Cadence mail flagged as spam</td><td>Deliverability drops</td><td>Send from users' mailboxes, throttle, suppression, bounce handling</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Assumptions: about 5 users; Microsoft 365 with Entra ID; Azure available; Janium continues; Zoho stays the recruiting system.</p>
+  <h3>Decisions needed</h3>
+  <ul class="checks">
+    <li>Approve the prototype (week of Oct 19) and its scope.</li>
+    <li>Confirm the HubSpot renewal date and cutover deadline.</li>
+    <li>Choose who builds Phase 1: the firm's developers, Errol, or a mix.</li>
+    <li>Agree the six items moved into Phase 1: deal value, dashboards, loss reasons, dedupe on import, backups, quotas.</li>
+    <li>Confirm the ZoomInfo API package.</li>
+    <li>Decide which HubSpot contacts to migrate.</li>
+    <li>Settle Monika's funnel names against Scott's stages.</li>
+    <li>Define revenue: signed contract value or billed revenue.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>Sources</p>
+  <ul>
+    <li><a href="https://claude.ai/code/artifact/ab3471f2-58e7-4135-97de-1c0a395a0878" target="_blank" rel="noopener">StaffCRM Lite requirements</a> (Scott sessions, Scott's Oct 12 brief, Monika's dashboards, Janium fields)</li>
+    <li><a href="https://learn.microsoft.com/en-us/graph/api/message-delta" target="_blank" rel="noopener">Microsoft Graph: message delta</a></li>
+    <li><a href="https://learn.microsoft.com/es-es/linkedin/shared/authentication/getting-access" target="_blank" rel="noopener">Microsoft Learn: LinkedIn API access (SNAP)</a></li>
+    <li><a href="https://tech-docs.zoominfo.com/enterprise-api-getting-started-guide.pdf" target="_blank" rel="noopener">ZoomInfo Enterprise API getting started guide</a></li>
+    <li><a href="https://pipeline.zoominfo.com/operations/contact-enrichment-api" target="_blank" rel="noopener">ZoomInfo: contact enrichment API</a></li>
+    <li><a href="https://prospeo.io/s/can-spam-penalties" target="_blank" rel="noopener">Prospeo: CAN-SPAM penalties 2026</a></li>
+  </ul>
+</footer>
+</main>
+</div>
+</body>
+</html>
