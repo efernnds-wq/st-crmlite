@@ -441,7 +441,7 @@ const demoPersonas=[
 	{id:'monika',name:'Monika',title:'Chief Strategy Officer',initials:'MO',tone:'gold',image:'assets/monika.jpg'},
 	{id:'ronnie',name:'Ronnie',title:'Chief Operating Officer',initials:'RO',tone:'sky',image:'assets/ronnie.jpg'},
 	{id:'danny',name:'Danny',title:'CEO',initials:'DA',tone:'lavender',image:'assets/danny.jpg'},
-	{id:'Jim',name:'Jim',title:'Business Sales Manager',initials:'RY',tone:'blue'},
+	{id:'Ryan',name:'Ryan',title:'Business Sales Manager',initials:'RY',tone:'blue'},
 ];
 let chosenPersona=null;
 const personaGrid=document.getElementById('personaGrid');
@@ -723,24 +723,24 @@ const EVENT_SERIES=['TAG','WIT','ATP','Fintech','TechNorth','Data & AI','Techbri
 const EVENT_ROLES=['Attendee','Speaker','Panelist','Moderator','Host','Table sponsor','Hole sponsor','Exhibitor','Bidder'];
 const seedV4={
  marketEvents:[
-  {id:'m1',title:'TAG Data & AI Society breakfast',series:'Data & AI',type:'Networking',date:rel(1),city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:50,status:'Committed',team:['Jim','Scott'],notes:'Early-morning networking; good for meeting data leaders.'},
-  {id:'m2',title:'TAG Technology Leadership Summit',series:'TAG',type:'Conference',date:rel(3),city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:1500,status:'Committed',team:['Scott','Jim'],notes:'Two passes. CIO and CTO track sessions.'},
-  {id:'m3',title:'FinTech Atlanta meetup',series:'Fintech',type:'Networking',date:rel(5),city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:0,status:'Committed',team:['Jim'],notes:''},
+  {id:'m1',title:'TAG Data & AI Society breakfast',series:'Data & AI',type:'Networking',date:rel(1),city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:50,status:'Committed',team:['Ryan','Scott'],notes:'Early-morning networking; good for meeting data leaders.'},
+  {id:'m2',title:'TAG Technology Leadership Summit',series:'TAG',type:'Conference',date:rel(3),city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:1500,status:'Committed',team:['Scott','Ryan'],notes:'Two passes. CIO and CTO track sessions.'},
+  {id:'m3',title:'FinTech Atlanta meetup',series:'Fintech',type:'Networking',date:rel(5),city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:0,status:'Committed',team:['Ryan'],notes:''},
   {id:'m4',title:'ATP CIO panel: modernizing legacy data',series:'ATP',type:'Round table / Panel',date:rel(12),city:'Atlanta, GA',region:'Atlanta',role:'Moderator',cost:0,status:'Committed',team:['Scott'],notes:'Scott moderates a four-person CIO panel.'},
   {id:'m5',title:'WIT Women of the Year Awards gala',series:'WIT',type:'Gala sponsorship',date:rel(9),city:'Atlanta, GA',region:'Atlanta',role:'Table sponsor',cost:8500,status:'Considering',team:['Monika','Danny'],notes:'Table of 10; invite two clients and three prospects.'},
   {id:'m6',title:'TechNorth fall forum',series:'TechNorth',type:'Conference',date:rel(16),city:'Alpharetta, GA',region:'Atlanta',role:'Attendee',cost:750,status:'Considering',team:[],notes:''},
   {id:'m7',title:'Data & AI Summit Southeast · keynote panel',series:'Data & AI',type:'Speaking',date:rel(22),city:'Charlotte, NC',region:'Southeast',role:'Speaker',cost:2500,status:'Committed',team:['Monika','Scott'],notes:'Monika speaks on AI readiness; travel included in cost.'},
-  {id:'m8',title:'Techbridge Golf Classic',series:'Techbridge',type:'Golf sponsorship',date:rel(34),city:'Atlanta, GA',region:'Atlanta',role:'Hole sponsor',cost:5000,status:'Considering',team:['Danny','Ronnie','Jim'],notes:'Hole sponsorship plus a foursome.'},
+  {id:'m8',title:'Techbridge Golf Classic',series:'Techbridge',type:'Golf sponsorship',date:rel(34),city:'Atlanta, GA',region:'Atlanta',role:'Hole sponsor',cost:5000,status:'Considering',team:['Danny','Ronnie','Ryan'],notes:'Hole sponsorship plus a foursome.'},
   {id:'m9',title:'Fintech South conference',series:'Fintech',type:'Conference',date:rel(45),city:'Atlanta, GA',region:'Atlanta',role:'Exhibitor',cost:12000,status:'Considering',team:[],notes:'Booth option; decide by month end.'},
   {id:'m10',title:'ST leadership speaking slot · TAG CEO breakfast',series:'TAG',type:'Speaking',date:rel(27),city:'Atlanta, GA',region:'Atlanta',role:'Speaker',cost:0,status:'Considering',team:['Danny'],notes:'Pitch Danny for a 15-minute talk.'},
   {id:'p1',title:'TAG summer technology summit',series:'TAG',type:'Conference',date:'2026-07-07',city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:1500,status:'Attended',team:['Scott'],notes:''},
-  {id:'p2',title:'FinTech Atlanta summer meetup',series:'Fintech',type:'Networking',date:'2026-08-10',city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:300,status:'Attended',team:['Scott','Jim'],notes:''},
+  {id:'p2',title:'FinTech Atlanta summer meetup',series:'Fintech',type:'Networking',date:'2026-08-10',city:'Atlanta, GA',region:'Atlanta',role:'Attendee',cost:300,status:'Attended',team:['Scott','Ryan'],notes:''},
   {id:'p3',title:'TAG executive auction',series:'TAG',type:'Auction',date:'2026-05-04',city:'Atlanta, GA',region:'Atlanta',role:'Bidder',cost:12000,status:'Attended',team:['Scott'],notes:'Won three executive meetings.'},
   {id:'p4',title:'Techbridge Golf Classic (spring)',series:'Techbridge',type:'Golf sponsorship',date:'2026-05-14',city:'Atlanta, GA',region:'Atlanta',role:'Hole sponsor',cost:5000,status:'Attended',team:['Danny','Ronnie'],notes:''},
   {id:'p5',title:'WIT spring gala',series:'WIT',type:'Gala sponsorship',date:'2026-04-16',city:'Atlanta, GA',region:'Atlanta',role:'Table sponsor',cost:8500,status:'Attended',team:['Monika','Danny'],notes:''}],
  dealEvent:{2:'p1',7:'p2',8:'p3',13:'p3',4:'rt-302'},
  contactEvent:{102:'p1',106:'p2',108:'p3',101:'rt-302',103:'rt-302'},
- reminderPrefs:{Jim:{weekly:true,monthly:true,scope:'all'},Scott:{weekly:true,monthly:false,scope:'mine'},Danny:{weekly:false,monthly:true,scope:'all'}}
+ reminderPrefs:{Ryan:{weekly:true,monthly:true,scope:'all'},Scott:{weekly:true,monthly:false,scope:'mine'},Danny:{weekly:false,monthly:true,scope:'all'}}
 };
 let calCursor=(()=>{const d=new Date();return {y:d.getFullYear(),m:d.getMonth()}})(),calFilter={series:'all',type:'all',region:'all',mine:false},selectedCalId=null,calTab='calendar';
 function normalizeV4(){if(!Array.isArray(data.marketEvents))data.marketEvents=structuredClone(seedV4.marketEvents);if(!data.reminderPrefs)data.reminderPrefs=structuredClone(seedV4.reminderPrefs);data.deals.forEach(d=>{if(d.eventId===undefined)d.eventId=seedV4.dealEvent[d.id]||''});data.contacts.forEach(c=>{if(c.eventId===undefined)c.eventId=seedV4.contactEvent[c.id]||''})}
@@ -790,7 +790,7 @@ const dealFormBeforeV4=dealForm;dealForm=function(){const opts=calendarItems().s
 
 /* --- wiring --- */
 const renderEventsBeforeV4=renderEvents;renderEvents=function(){renderEventsBeforeV4();renderCalendar()};
-demoPersonas.forEach(p=>{if(p.id==='Jim')p.title='Business Sales Manager';if(p.id==='stephen')p.title='Marketing Manager'});renderPersonaCards();
+demoPersonas.forEach(p=>{if(p.id==='Ryan')p.title='Business Sales Manager';if(p.id==='stephen')p.title='Marketing Manager'});renderPersonaCards();
 {const cur=demoPersonas.find(p=>p.name===document.getElementById('userName').textContent);if(cur)document.getElementById('userTitle').textContent=cur.title}
 normalizeV4();try{localStorage.setItem(storeKey,JSON.stringify(data))}catch{}renderAll();
 </script>
@@ -806,13 +806,13 @@ const seedV5={
   {name:'Ronnie',fullName:'Ronnie',email:'ronnie@softensity.com',title:'Chief Operating Officer',role:'Leadership',admin:false,leadershipAccess:true,status:'Active',image:'assets/ronnie.jpg',tone:'sky',added:'2026-01-05'},
   {name:'Scott',fullName:'Scott',email:'scott@softensity.com',title:'VP Sales',role:'Sales',admin:true,leadershipAccess:true,status:'Active',image:'assets/scott.jpg',tone:'mint',added:'2026-01-05'},
   {name:'Stephen',fullName:'Stephen',email:'stephen@softensity.com',title:'Marketing Manager',role:'Marketing',admin:true,leadershipAccess:false,status:'Active',image:'assets/stephen.jpg',tone:'coral',added:'2026-01-05'},
-  {name:'Jim',fullName:'Jim',email:'Jim@softensity.com',title:'Business Sales Manager',role:'Sales',admin:false,leadershipAccess:false,status:'Active',image:'',tone:'blue',added:'2026-06-02'}],
+  {name:'Ryan',fullName:'Ryan',email:'Ryan@softensity.com',title:'Business Sales Manager',role:'Sales',admin:false,leadershipAccess:false,status:'Active',image:'',tone:'blue',added:'2026-06-02'}],
  roleAccess:{Sales:{pipeline:true,companies:true,contacts:true,tasks:true,cadences:true,nurture:true,events:true,reports:true,scope:'all'},Marketing:{pipeline:false,companies:true,contacts:true,tasks:true,cadences:true,nurture:true,events:true,reports:true,scope:'all'},Viewer:{pipeline:true,companies:true,contacts:false,tasks:false,cadences:false,nurture:false,events:true,reports:true,scope:'all'}},
  prefs:{},
- audit:[{date:'2026-06-02',by:'Scott',action:'Onboarded Jim as Sales (Business Sales Manager)'},{date:'2026-01-05',by:'Scott',action:'Granted leadership access to Scott (approved by Danny)'}]
+ audit:[{date:'2026-06-02',by:'Scott',action:'Onboarded Ryan as Sales (Business Sales Manager)'},{date:'2026-01-05',by:'Scott',action:'Granted leadership access to Scott (approved by Danny)'}]
 };
 let settingsTab='prefs';
-function normalizeV5(){['users','roleAccess','prefs','audit'].forEach(k=>{if(data[k]==null)data[k]=structuredClone(seedV5[k])});if(!data.v5Seeded){data.v5Seeded=true;data.contacts.forEach(c=>{if([107,109].includes(c.id)&&c.owner==='Scott')c.owner='Jim'});if(!data.tasks.some(t=>t.owner==='Jim'))data.tasks.push({id:207,title:'Invite Laura to the Oct 22 round table',company:'Harbor Eats',contact:'Laura Bennett',owner:'Jim',due:rel(2),done:false})}}
+function normalizeV5(){['users','roleAccess','prefs','audit'].forEach(k=>{if(data[k]==null)data[k]=structuredClone(seedV5[k])});if(!data.v5Seeded){data.v5Seeded=true;data.contacts.forEach(c=>{if([107,109].includes(c.id)&&c.owner==='Scott')c.owner='Ryan'});if(!data.tasks.some(t=>t.owner==='Ryan'))data.tasks.push({id:207,title:'Invite Laura to the Oct 22 round table',company:'Harbor Eats',contact:'Laura Bennett',owner:'Ryan',due:rel(2),done:false})}}
 const persistBeforeV5=persist;persist=function(){normalizeV5();persistBeforeV5()};
 const userByName=n=>data.users.find(u=>u.name===n);
 const currentUser=()=>userByName(currentEventUser())||{name:currentEventUser(),role:'Viewer',admin:false,leadershipAccess:false,status:'Active'};
